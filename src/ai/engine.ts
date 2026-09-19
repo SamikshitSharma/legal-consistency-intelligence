@@ -16,12 +16,34 @@ export class LegalReasoningEngine {
     if (customProvider) {
       this.provider = customProvider;
     } else {
+      const isExplicitSimulation =
+        process.env.AI_PROVIDER === 'simulation' || process.env.TEST_MODE === 'true';
+      const isProductionMode =
+        process.env.AI_PROVIDER === 'production' ||
+        (process.env.NODE_ENV === 'production' && !isExplicitSimulation);
+
       const gemini = new GeminiProvider();
-      if (gemini.isConfigured()) {
+
+      if (isProductionMode) {
+        if (!gemini.isConfigured()) {
+          throw new Error(
+            'CRITICAL CONFIGURATION ERROR: AI_PROVIDER is set to production, but GEMINI_API_KEY is not configured. Falling back to SimulatedProvider in production is strictly prohibited.'
+          );
+        }
         this.provider = gemini;
-      } else {
-        safeLog('info', 'LegalReasoningEngine', 'No Gemini API key found, defaulting to simulated reasoning engine.');
+      } else if (gemini.isConfigured() && !isExplicitSimulation) {
+        this.provider = gemini;
+      } else if (isExplicitSimulation || process.env.NODE_ENV === 'test' || !process.env.NODE_ENV) {
+        safeLog(
+          'info',
+          'LegalReasoningEngine',
+          'Running with SimulatedProvider in non-production test/development mode.'
+        );
         this.provider = new SimulatedProvider();
+      } else {
+        throw new Error(
+          'CRITICAL CONFIGURATION ERROR: Production AI provider required. GEMINI_API_KEY must be configured, or set AI_PROVIDER=simulation for offline test mode.'
+        );
       }
     }
   }

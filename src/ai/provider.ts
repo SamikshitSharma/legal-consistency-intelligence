@@ -12,14 +12,15 @@ export class GeminiProvider implements AIProvider {
   private apiKey: string;
   private model: string;
 
-  constructor(apiKey?: string, model: string = 'gemini-1.5-pro') {
+  constructor(apiKey?: string, model?: string) {
     this.apiKey =
       apiKey ||
       process.env.GEMINI_API_KEY ||
       process.env.GOOGLE_API_KEY ||
       process.env.GOOGLE_GENAI_API_KEY ||
       '';
-    this.model = model;
+    // Use currently supported production Gemini model from environment or default to gemini-2.5-flash
+    this.model = model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   }
 
   getModelIdentifier(): string {
@@ -76,8 +77,8 @@ export class GeminiProvider implements AIProvider {
 
 /**
  * SimulatedProvider: Deterministic semantic cross-document analysis engine.
- * Used for automated tests, offline verification, and fallback.
- * Performs real semantic reasoning across input clauses according to v1.2.2.
+ * Used exclusively for automated test suites and offline verification.
+ * Strictly prohibited from being used as a production fallback.
  */
 export class SimulatedProvider implements AIProvider {
   private modelName: string;

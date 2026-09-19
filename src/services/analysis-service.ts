@@ -19,6 +19,7 @@ import { safeLog } from '../security/sanitizer';
 export interface AnalysisInput {
   files: UploadedFile[];
   focusQuestion?: string;
+  userOrSessionId?: string;
   customEngine?: LegalReasoningEngine;
 }
 
@@ -74,6 +75,7 @@ export class AnalysisService {
       docAHash: docA.hash,
       docBHash: docB.hash,
       focusQuestion: input.focusQuestion,
+      userOrSessionId: input.userOrSessionId,
       modelIdentifier: this.engine.getModelIdentifier(),
       promptVersion,
       schemaVersion,

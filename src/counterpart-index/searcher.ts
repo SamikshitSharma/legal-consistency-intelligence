@@ -90,7 +90,11 @@ export function findCounterpart(
     }
   }
 
-  const candidateIds = Array.from(candidateScores.keys());
+  // Sort candidate IDs by relevance score descending and bound to top candidates (O(1) per clause)
+  const candidateIds = Array.from(candidateScores.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 25)
+    .map(([id]) => id);
 
   // If 0 candidates in inverted index lookup, it is confirmed an orphan
   if (candidateIds.length === 0) {

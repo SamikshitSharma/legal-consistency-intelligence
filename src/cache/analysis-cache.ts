@@ -9,11 +9,16 @@ export interface CacheKeyParams {
   promptVersion: string;
   schemaVersion: string;
   pipelineVersion: string;
+  /**
+   * User, session, or tenant identifier to prevent cross-user legal document data leakage
+   */
+  userOrSessionId?: string;
 }
 
 export function generateAnalysisCacheKey(params: CacheKeyParams): string {
   const normalizedQuestion = (params.focusQuestion || '').trim().toLowerCase();
   const rawKey = [
+    params.userOrSessionId || 'default-session',
     params.docAHash,
     params.docBHash,
     normalizedQuestion,

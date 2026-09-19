@@ -3,7 +3,7 @@ import { InjectedContentFlag, ServerClause } from '../types/contract';
 const INJECTION_PATTERNS: { name: string; regex: RegExp }[] = [
   {
     name: 'Instruction Override',
-    regex: /\b(?:ignore|disregard|forget|bypass)\s+(?:all\s+)?(?:previous|prior|above|system)\s+instructions\b/i,
+    regex: /\b(?:ignore|disregard|forget|bypass)\s+(?:all\s+)?(?:previous\s+|prior\s+|above\s+|system\s+)?instructions\b/i,
   },
   {
     name: 'Persona Hijack',
@@ -15,7 +15,7 @@ const INJECTION_PATTERNS: { name: string; regex: RegExp }[] = [
   },
   {
     name: 'System Prompt Exfiltration',
-    regex: /\b(?:reveal|output|display|show|print|leak)\s+(?:the\s+)?(?:system prompt|initial prompt|hidden prompt|secret instructions)\b/i,
+    regex: /\b(?:reveal|output|display|show|print|leak)\s+(?:the\s+)?(?:hidden\s+|initial\s+|secret\s+)?(?:system prompt|initial prompt|secret instructions)\b/i,
   },
   {
     name: 'Directive Fabrication',

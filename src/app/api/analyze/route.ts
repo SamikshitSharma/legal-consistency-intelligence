@@ -68,10 +68,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const userOrSessionId =
+      req.headers.get('x-user-id') ||
+      req.headers.get('x-session-id') ||
+      req.headers.get('authorization') ||
+      req.headers.get('x-forwarded-for') ||
+      'anonymous-session';
+
     const service = new AnalysisService();
     const report = await service.analyze({
       files: uploadedFiles,
       focusQuestion,
+      userOrSessionId,
     });
 
     return NextResponse.json(report, { status: 200 });
