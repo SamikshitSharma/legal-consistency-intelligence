@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { AnalysisService } from '@/services/analysis-service';
 import { UploadedFile } from '@/types/contract';
@@ -68,12 +69,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const userOrSessionId =
-      req.headers.get('x-user-id') ||
-      req.headers.get('x-session-id') ||
-      req.headers.get('authorization') ||
-      req.headers.get('x-forwarded-for') ||
-      'anonymous-session';
+    // Secure Session Resolution:
+    // 1. Authenticated Bearer token (hashed)
+    // 2. Cryptographic session cookie (legal_session_id)
+    // 3. Newly issued cryptographically random UUID session cookie
+    const authHeader = req.headers.get('authorization');
+    let userOrSessionId: string;
+    let newSessionCookie: string | null = null;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      userOrSessionId = `auth:${crypto.createHash('sha256').update(authHeader).digest('hex').substring(0, 32)}`;
+    } else {
+      const cookieSession = req.cookies.get('legal_session_id')?.value;
+      if (cookieSession && /^[a-zA-Z0-9_-]{16,64}$/.test(cookieSession)) {
+        userOrSessionId = `sess:${cookieSession}`;
+      } else {
+        const generated = crypto.randomUUID();
+        userOrSessionId = `sess:${generated}`;
+        newSessionCookie = generated;
+      }
+    }
 
     const service = new AnalysisService();
     const report = await service.analyze({
@@ -82,7 +97,17 @@ export async function POST(req: NextRequest) {
       userOrSessionId,
     });
 
-    return NextResponse.json(report, { status: 200 });
+    const response = NextResponse.json(report, { status: 200 });
+    if (newSessionCookie) {
+      response.cookies.set('legal_session_id', newSessionCookie, {
+        httpOnly: true,
+        sameSite: 'strict',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
+
+    return response;
   } catch (err: any) {
     safeLog('error', 'API:Analyze', err.message);
 

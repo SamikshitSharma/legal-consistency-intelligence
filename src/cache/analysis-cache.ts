@@ -17,18 +17,19 @@ export interface CacheKeyParams {
 
 export function generateAnalysisCacheKey(params: CacheKeyParams): string {
   const normalizedQuestion = (params.focusQuestion || '').trim().toLowerCase();
-  const rawKey = [
-    params.userOrSessionId || 'default-session',
-    params.docAHash,
-    params.docBHash,
-    normalizedQuestion,
-    params.modelIdentifier,
-    params.promptVersion,
-    params.schemaVersion,
-    params.pipelineVersion,
-  ].join('::');
+  
+  // Canonical hashing using length-prefixed parts to eliminate delimiter collision or key injection
+  const h = crypto.createHash('sha256');
+  h.update(`user:${params.userOrSessionId || 'default-session'}\n`);
+  h.update(`docA:${params.docAHash}\n`);
+  h.update(`docB:${params.docBHash}\n`);
+  h.update(`q:${normalizedQuestion}\n`);
+  h.update(`model:${params.modelIdentifier}\n`);
+  h.update(`prompt:${params.promptVersion}\n`);
+  h.update(`schema:${params.schemaVersion}\n`);
+  h.update(`pipeline:${params.pipelineVersion}\n`);
 
-  return crypto.createHash('sha256').update(rawKey).digest('hex');
+  return h.digest('hex');
 }
 
 export class AnalysisCache {

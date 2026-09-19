@@ -84,6 +84,33 @@ describe('Phase 25 & 30: Efficiency, Cache Audit, and Multi-Tenant Isolation', (
     expect(key1).not.toBe(key3);
   });
 
+  it('P1 Cache Audit: prevents delimiter injection and collision across session IDs', () => {
+    const keyNormalUser = generateAnalysisCacheKey({
+      userOrSessionId: 'user1',
+      docAHash: 'hashA',
+      docBHash: 'hashB',
+      focusQuestion: 'none',
+      modelIdentifier: 'gemini-2.5-flash',
+      promptVersion: 'v1.2.2',
+      schemaVersion: '1.2',
+      pipelineVersion: 'v1.2.2',
+    });
+
+    // Attacker tries to inject delimiter characters to mimic user1
+    const keyAttacker = generateAnalysisCacheKey({
+      userOrSessionId: 'user1::hashA',
+      docAHash: 'hashB',
+      docBHash: 'none',
+      focusQuestion: 'gemini-2.5-flash',
+      modelIdentifier: 'v1.2.2',
+      promptVersion: '1.2',
+      schemaVersion: 'v1.2.2',
+      pipelineVersion: 'v1.2.2',
+    });
+
+    expect(keyNormalUser).not.toBe(keyAttacker);
+  });
+
   it('enforces bounded memory eviction and TTL expiration', async () => {
     // Cache bounded to 2 entries with 50ms TTL
     const boundedCache = new AnalysisCache(2, 50);
