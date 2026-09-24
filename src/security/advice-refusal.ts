@@ -20,9 +20,22 @@ export interface AdviceCheckResult {
   suggestedQuestions?: string[];
 }
 
+export class FocusQuestionLengthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FocusQuestionLengthError';
+  }
+}
+
 export function checkFocusQuestionForAdvice(focusQuestion?: string): AdviceCheckResult {
   if (!focusQuestion || focusQuestion.trim().length === 0) {
     return { isAdviceSeeking: false };
+  }
+
+  if (focusQuestion.trim().length > 1000) {
+    throw new FocusQuestionLengthError(
+      'Focus question exceeds the maximum allowed length of 1,000 characters. Please provide a concise guidance question.'
+    );
   }
 
   for (const pattern of ADVICE_PATTERNS) {

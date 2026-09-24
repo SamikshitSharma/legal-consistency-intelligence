@@ -50,3 +50,25 @@ export function scanClausesForInjection(clauses: ServerClause[]): InjectedConten
 
   return flags;
 }
+
+/**
+ * Scans focus question for instruction override or system prompt exfiltration attempts.
+ */
+export function scanFocusQuestionForInjection(focusQuestion?: string): InjectedContentFlag | null {
+  if (!focusQuestion || focusQuestion.trim().length === 0) return null;
+
+  for (const pattern of INJECTION_PATTERNS) {
+    const match = focusQuestion.match(pattern.regex);
+    if (match) {
+      return {
+        document_id: 'focus_question',
+        clause_id: 'user_prompt',
+        matched_pattern: pattern.name,
+        snippet: match[0],
+      };
+    }
+  }
+
+  return null;
+}
+

@@ -114,8 +114,14 @@ export async function POST(req: NextRequest) {
     // Return clean user-facing error response
     const status =
       err.name === 'DocumentCountError' ||
+      err.name === 'DocumentExtractionError' ||
+      err.name === 'FocusQuestionLengthError' ||
       err.message.includes('Invalid document count') ||
-      err.message.includes('validation failed')
+      err.message.includes('validation failed') ||
+      err.message.includes('exceeds') ||
+      err.message.includes('Unsupported') ||
+      err.message.includes('empty') ||
+      err.message.includes('does not contain extractable text')
         ? 400
         : 500;
 

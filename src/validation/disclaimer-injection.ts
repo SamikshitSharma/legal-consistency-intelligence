@@ -18,10 +18,14 @@ export function injectDisclaimerAndSecurityFlags(
   modelOutput: ModelRawOutput,
   docA: ProcessedDocument,
   docB: ProcessedDocument,
-  metadata: AnalysisMetadata
+  metadata: AnalysisMetadata,
+  focusQuestionFlag?: InjectedContentFlag | null
 ): ValidatedAnalysisReport {
   const allClauses = [...docA.clauses, ...docB.clauses];
   const injectedFlags: InjectedContentFlag[] = scanClausesForInjection(allClauses);
+  if (focusQuestionFlag) {
+    injectedFlags.push(focusQuestionFlag);
+  }
 
   return {
     schema_version: '1.2',

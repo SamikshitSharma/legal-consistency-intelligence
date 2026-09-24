@@ -15,8 +15,9 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB per document
  */
 export function sanitizeFilename(rawFilename: string): string {
   const basename = path.basename(rawFilename);
-  // Replace anything that is not alphanumeric, dash, dot, or underscore
-  const sanitized = basename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  // Replace anything that is not a Unicode letter, Unicode digit, dot, underscore, or dash
+  // Preserves legitimate international characters while stripping path traversal & shell chars
+  const sanitized = basename.replace(/[^\p{L}\p{N}._-]/gu, '_').replace(/^_+/, '');
   return sanitized.length > 0 ? sanitized : 'document.txt';
 }
 

@@ -54,6 +54,13 @@ export async function extractDocumentText(
     );
   }
 
+  // Safety ceiling on single-document text volume (500,000 characters ≈ 100,000 words ≈ 200 pages)
+  if (normalized.length > 500_000) {
+    throw new DocumentExtractionError(
+      `Document "${filename}" exceeds the maximum supported text limit of 500,000 characters. Please provide a standard agreement or excerpt.`
+    );
+  }
+
   return {
     text: normalized,
     pageCount,

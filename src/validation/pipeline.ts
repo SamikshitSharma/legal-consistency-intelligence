@@ -1,5 +1,6 @@
 import {
   AnalysisMetadata,
+  InjectedContentFlag,
   ModelRawOutput,
   ProcessedDocument,
   ValidatedAnalysisReport,
@@ -25,7 +26,8 @@ export function runValidationPipeline(
   rawModelOutput: any,
   docA: ProcessedDocument,
   docB: ProcessedDocument,
-  metadata: AnalysisMetadata
+  metadata: AnalysisMetadata,
+  focusQuestionFlag?: InjectedContentFlag | null
 ): ValidatedAnalysisReport {
   // Step 1: Document-count gate
   validateDocumentCount([docA, docB]);
@@ -88,5 +90,5 @@ export function runValidationPipeline(
   };
 
   // Step 12: Disclaimer + injected_content_flags injection
-  return injectDisclaimerAndSecurityFlags(finalModelOutput, docA, docB, metadata);
+  return injectDisclaimerAndSecurityFlags(finalModelOutput, docA, docB, metadata, focusQuestionFlag);
 }
