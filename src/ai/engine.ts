@@ -19,8 +19,8 @@ export class LegalReasoningEngine {
       const isExplicitSimulation =
         process.env.AI_PROVIDER === 'simulation' || process.env.TEST_MODE === 'true';
       const isProductionMode =
-        process.env.AI_PROVIDER === 'production' ||
-        (process.env.NODE_ENV === 'production' && !isExplicitSimulation);
+        (process.env.AI_PROVIDER === 'production' || process.env.NODE_ENV === 'production') &&
+        !isExplicitSimulation;
 
       const gemini = new GeminiProvider();
 

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { AnalysisService } from '@/services/analysis-service';
 import { UploadedFile } from '@/types/contract';
-import { safeLog } from '@/security/sanitizer';
+import { safeLog, sanitizeLogMessage } from '@/security/sanitizer';
 
 export const dynamic = 'force-dynamic';
 
@@ -111,23 +111,37 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     safeLog('error', 'API:Analyze', err.message);
 
-    // Return clean user-facing error response
-    const status =
+    const msg = (err.message || '').toLowerCase();
+    let status = 500;
+
+    if (
       err.name === 'DocumentCountError' ||
       err.name === 'DocumentExtractionError' ||
       err.name === 'FocusQuestionLengthError' ||
-      err.message.includes('Invalid document count') ||
-      err.message.includes('validation failed') ||
-      err.message.includes('exceeds') ||
-      err.message.includes('Unsupported') ||
-      err.message.includes('empty') ||
-      err.message.includes('does not contain extractable text')
-        ? 400
-        : 500;
+      err.name === 'InvalidInputError' ||
+      msg.includes('invalid document count') ||
+      msg.includes('validation failed') ||
+      msg.includes('exceeds') ||
+      msg.includes('unsupported') ||
+      msg.includes('empty') ||
+      msg.includes('does not contain extractable text') ||
+      msg.includes('exactly two documents') ||
+      msg.includes('invalid input')
+    ) {
+      status = 400;
+    } else if (msg.includes('[429]') || msg.includes('rate limit') || msg.includes('quota') || msg.includes('too many requests')) {
+      status = 429;
+    } else if (msg.includes('[503]') || msg.includes('service unavailable') || msg.includes('overloaded') || msg.includes('temporarily unavailable')) {
+      status = 503;
+    } else if (err.name === 'SchemaValidationError' || msg.includes('schema validation') || msg.includes('malformed')) {
+      status = 502;
+    }
+
+    const cleanError = sanitizeLogMessage(err.message || 'An error occurred during legal consistency analysis.');
 
     return NextResponse.json(
       {
-        error: err.message || 'An error occurred during legal consistency analysis.',
+        error: cleanError,
         error_type: err.name || 'AnalysisError',
       },
       { status }

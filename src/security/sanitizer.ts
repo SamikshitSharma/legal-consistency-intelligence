@@ -7,7 +7,8 @@
 
 export function sanitizeLogMessage(message: string): string {
   return message
-    .replace(/AIza[0-9A-Za-z-_]{35}/g, '[REDACTED_API_KEY]')
+    .replace(/([?&]key=)[^&\s"'`]+/gi, '$1[REDACTED_API_KEY]')
+    .replace(/AIza[0-9A-Za-z-_]+/g, '[REDACTED_API_KEY]')
     .replace(/(?:bearer\s+)[a-zA-Z0-9._-]+/gi, 'Bearer [REDACTED_TOKEN]')
     .replace(/("?(?:text|raw_text|content)"?\s*:\s*")[^"]{100,}(")/g, '$1[DOCUMENT_CONTENT_REDACTED]$2');
 }
