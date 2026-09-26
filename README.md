@@ -98,7 +98,7 @@ The mandatory legal information notice is injected server-side by the pipeline a
 ## 6. Performance & Multi-Tenant Caching
 - **Deterministic Token Hashing**: Doc A and Doc B text are normalized and hashed with SHA-256.
 - **Length-Prefixed Namespaced Cache Keys**: Combines `userOrSessionId`, `docAHash`, `docBHash`, `focusQuestion`, `modelIdentifier`, `promptVersion`, `schemaVersion`, and `pipelineVersion` to prevent cross-tenant cache pollution or delimiter collision.
-- **Zero-Call Repeat Queries**: Repeat identical analyses are served from the server-side LRU cache in `< 5ms` with `cache_hit: true` and `model_call_count: 0`.
+- **Zero-Call Repeat Queries**: Repeat identical analyses are served from the server-side LRU cache with `cache_hit: true` and `model_call_count: 0` (measured `< 5ms` in test benchmarks).
 - **Identical Document Detection**: Uploading identical copies as Document A and Document B is detected deterministically (0 model calls), returning zero modifications and an informative parity notice.
 
 ---
@@ -122,7 +122,7 @@ When `AI_PROVIDER=production` or `NODE_ENV=production`:
 ## 8. Verification & Test Commands
 
 ```bash
-# Run complete offline test suite (25 test suites, 116 tests)
+# Run complete offline test suite (25 test suites, 116 tests: 96 unit/integration + 20 acceptance)
 npm test
 
 # Run TypeScript type check
