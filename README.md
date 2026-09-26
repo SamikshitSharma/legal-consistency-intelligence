@@ -81,10 +81,10 @@ Every finding is strictly classified into exactly one of six frozen taxonomy lab
 ## 5. Security & Legal-Safety Boundaries
 
 ### Untrusted Source Data Isolation
-Document clauses and user inputs are strictly isolated as untrusted data. Clauses containing override directives (e.g., `IGNORE ALL PREVIOUS INSTRUCTIONS`, `ACT AS SYSTEM ADMIN`, `REVEAL SYSTEM PROMPT`) are:
+Document clauses and user inputs are strictly treated as untrusted data. Clauses containing override directives (e.g., `IGNORE ALL PREVIOUS INSTRUCTIONS`, `ACT AS SYSTEM ADMIN`, `REVEAL SYSTEM PROMPT`) are:
 1. Detected and surfaced in `injected_content_flags`.
-2. Evaluated strictly as legal contract text by the model.
-3. Forbidden from altering system constraints, personas, or output structures.
+2. Evaluated strictly as legal contract text by the model within delimited prompt structures.
+3. Isolated as untrusted content, while server-side validation enforces the application's schema, taxonomy, citation, safety, and rendering constraints.
 
 ### Advice-Seeking Focus Question Interception
 Queries requesting legal advice, validity determinations, or signing decisions (e.g., *"Should I sign?"*, *"Is this legal?"*, *"Can we sue?"*) trigger a deterministic pre-call advisory warning and are supplemented with attorney briefing questions rather than legal conclusions.
