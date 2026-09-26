@@ -31,15 +31,15 @@ Original Legal Document (Doc A)  +  Revised Legal Document (Doc B)
               Inverted Index & Counterpart Matching
                              │
                              ▼
-         Single Structured Gemini Reasoning Call (v1.2.2)
-         (Target: gemini-3.6-flash, temperature 0.0, JSON mode)
+         Structured Gemini Reasoning Call (v1.2.2)
+         (Normally uses 1 structured call; bounded retry on malformed output; gemini-3.6-flash, temp 0.0, JSON mode)
                              │
                              ▼
      Consolidated Validation Pipeline (Steps 1 to 12)
        1. Document-count gate
        2. Strict JSON Schema v1.2 enforcement
        3. Relationship taxonomy gate
-       4. Citation existence check against real source clauses
+       4. Citation existence validation (server-side check rejects unsupported clause references)
        5. Evidence-count-per-relationship validation
        6. Coexistence test enforcement (null on non-conflict)
        7. Full-document removal completeness verification
@@ -122,7 +122,7 @@ When `AI_PROVIDER=production` or `NODE_ENV=production`:
 ## 8. Verification & Test Commands
 
 ```bash
-# Run complete offline test suite (23 test files, 83 tests)
+# Run complete offline test suite (25 test suites, 116 tests)
 npm test
 
 # Run TypeScript type check
